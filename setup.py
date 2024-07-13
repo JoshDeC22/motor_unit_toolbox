@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-from __init__ import __version__
+from motor_unit_toolbox import __version__
 
 def fetch_requirements():
     with open("requirements.txt", "r", encoding="utf-8", errors="ignore") as f:
