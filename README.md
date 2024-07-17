@@ -80,6 +80,12 @@ This project is licensed under the MIT License.
 If you use this code in your research, please cite this repository:
 
 ```sh
+@software{Mendez_Guerra_Motor_Unit_Toolbox,
+author = {Mendez Guerra, Irene},
+title = {{Motor Unit Toolbox}},
+url = {https://github.com/imendezguerra/motor_unit_toolbox},
+version = {1.0}
+}
 ```
 ## Contact
 
