@@ -48,8 +48,8 @@ dependencies:
   - matplotlib-base=3.7.2
   - ncurses=6.4
   - numexpr=2.8.4
-  - numpy=1.24.3
-  - numpy-base=1.24.3
+  - numpy=1.23.2
+  - numpy-base=1.23.2
   - openjpeg=2.4.0
   - openssl=3.0.14
   - packaging=24.1
