@@ -7,7 +7,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from matplotlib.collections import PatchCollection
 from matplotlib.patches import Rectangle
-from muap_comp import (
+from motor_unit_toolbox.muap_comp import (
     get_percentile_ch,
     get_highest_amp_ch,
     get_highest_ptp_ch,

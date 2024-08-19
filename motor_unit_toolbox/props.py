@@ -5,7 +5,13 @@ from copy import copy
 from typing import Union, Optional, Tuple
 import numpy as np
 from scipy import signal
-import muap_comp
+from motor_unit_toolbox.muap_comp import (
+    get_percentile_ch,
+    get_highest_amp_ch,
+    get_highest_ptp_ch,
+    get_highest_iqr_ch,
+    get_highest_iqr_ptp_ch,
+)
 
 
 def _check_mu_format(data: np.ndarray) -> np.ndarray:
@@ -589,10 +595,10 @@ def get_muap_waveform_length(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
 
         # Apply channel selection
@@ -652,10 +658,10 @@ def get_muap_energy(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
         # Apply channel selection
         for unit in range(units):
@@ -712,10 +718,10 @@ def get_muap_ptp(muaps: np.ndarray, sel_chs_by: Optional[str] = "iqr") -> np.nda
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
         # Apply channel selection
         for unit in range(units):
@@ -775,10 +781,10 @@ def get_muap_ptp_time(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
         # Apply channel selection
         for unit in range(units):
@@ -845,10 +851,10 @@ def get_muap_peak_frequency(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
 
         # Apply channel selection
@@ -920,10 +926,10 @@ def get_muap_median_frequency(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
 
         # Apply channel selection
@@ -996,10 +1002,10 @@ def get_muap_mean_frequency(
         # Build channel selection
         sel_chs_mask_units = np.zeros(muaps.shape[0:3]).astype(bool)
         sel_chs_fun = {
-            "iqr": muap_comp.get_highest_iqr_ch,
-            "iqr_ptp": muap_comp.get_highest_iqr_ptp_ch,
-            "max_amp": muap_comp.get_highest_amp_ch,
-            "ptp": muap_comp.get_highest_ptp_ch
+            "iqr": get_highest_iqr_ch,
+            "iqr_ptp": get_highest_iqr_ptp_ch,
+            "max_amp": get_highest_amp_ch,
+            "ptp": get_highest_ptp_ch
         }
 
         # Apply channel selection
