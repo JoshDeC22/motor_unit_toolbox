@@ -45,6 +45,9 @@ def rate_of_agreement_paired(
     if len(spike_trains_test.shape) == 1:
         spike_trains_test = np.expand_dims(spike_trains_test, axis=-1)
 
+    if spike_trains_ref.shape != spike_trains_test.shape:
+        raise ValueError(f'Dimensionality mismatch between ref {spike_trains_ref.shape} and test {spike_trains_test.shape}.')
+
     # Put tolerances into samples
     tol_spike = round(tol_spike_ms / 1000 * fs)
     tol_train = round(tol_train_ms / 1000 * fs)
@@ -169,6 +172,9 @@ def rate_of_agreement(
     if spike_trains_test is not None:
         if len( spike_trains_test.shape ) == 1:
             spike_trains_test = np.expand_dims(spike_trains_test, axis=-1)
+    
+    if spike_trains_ref.shape[0] != spike_trains_test.shape[0]:
+        raise ValueError(f'Time dimensionality mismatch between ref {spike_trains_ref.shape} and test {spike_trains_test.shape}.')
 
     # Put tolerances into samples
     tol_spike = round(tol_spike_ms/1000 * fs)
@@ -347,7 +353,9 @@ def rate_of_agreement_all(
         # Ensure right format and get number of units
         if len(spike_trains.shape) == 1:
             spike_trains = np.expand_dims(spike_trains, axis=-1)
-        n_units = spike_trains.shape[1]
+        samples, n_units = spike_trains.shape
+        if samples < n_units:
+            raise Warning("The number of samples is less than the number of units. Consider transposing the spike trains.")
 
         # Compute RoA across all unique pairs
         if n_units == 1:
@@ -475,6 +483,9 @@ def precision_sensitivity_f1_paired(
 
     if len(spike_trains_test.shape) == 1:
         spike_trains_test = np.expand_dims(spike_trains_test, axis=-1)
+
+    if spike_trains_ref.shape != spike_trains_test.shape:
+        raise ValueError(f'Dimensionality mismatch between ref {spike_trains_ref.shape} and test {spike_trains_test.shape}.')
 
     # Put tolerances into samples
     tol_spike = round(tol_spike_ms / 1000 * fs)
@@ -611,6 +622,9 @@ def get_tp_fp_fn_paired(
 
     if len(spike_trains_test.shape) == 1:
         spike_trains_test = np.expand_dims(spike_trains_test, axis=-1)
+
+    if spike_trains_ref.shape != spike_trains_test.shape:
+        raise ValueError(f'Dimensionality mismatch between ref {spike_trains_ref.shape} and test {spike_trains_test.shape}.')
 
     # Put tolerances into samples
     tol_spike = round(tol_spike_ms / 1000 * fs)
