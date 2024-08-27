@@ -133,17 +133,18 @@ def rate_of_agreement(
     spike_trains_test: np.ndarray,
     fs: Optional[int] = 2048,
     tol_spike_ms: Optional[int] = 1,
-    tol_train_ms: Optional[int] = 40
+    tol_train_ms: Optional[int] = 40,
 ) -> Tuple[np.ndarray, List[Tuple[int, int]], np.ndarray]:
     """Compute the rate of agreement between two sets of spike trains.
 
     Args:
         spike_trains_ref (Union[np.ndarray, None]): Reference spike trains 
-            with shape (m, n) where m is the number of samples and n is the
-            number of motor units. If None are provided, the function will
-            compute the RoA within the test set.
-        spike_trains_test (np.ndarray): Test spike trains with shape (m, n),
-            where m is the number of samples and n is the number of motor units.
+            with shape (m, n1) where m is the number of samples and n1 is the
+            number of motor units in the reference set. If None are provided, 
+            the function will compute the RoA within the test set.
+        spike_trains_test (np.ndarray): Test spike trains with shape (m, n2),
+            where m is the number of samples and n2 is the number of motor units
+            in the test set.
         fs (Optional[int], optional): Sampling frequency in Hz. Defaults to 2048.
         tol_spike_ms (Optional[int], optional): Spike tolerance in milliseconds.
             Defaults to 1.
@@ -152,16 +153,17 @@ def rate_of_agreement(
 
     Returns:
         Tuple[np.ndarray, List[Tuple[int, int]], np.ndarray]: A tuple containing:
-            - RoA (np.ndarray): Rate of agreement between the aligned spike trains,
-              with shape (n).
+            - RoA (np.ndarray): Rate of agreement between the aligned spike trains.
             - pair_idx (List[Tuple[int, int]]): List of pairs of motor units that
               have the highest rate of agreement.
             - pair_lag (np.ndarray): Optimal lag for alignment between the pairs of
-              motor units, with shape (n).
+              motor units.
 
     Note:
         - The function does not assume that the spike trains between the sets are 
           matched nor in the same order.
+        - The dimensions of the output arrays will depend on the number of matched
+          pairs between the sets.
     """
 
     # Check spike trains shape
@@ -306,6 +308,121 @@ def rate_of_agreement(
 
     return roa_sorted, pair_idx_sorted, pair_lag_sorted
 
+def rate_of_agreement_full(
+    spike_trains_ref: np.ndarray,
+    spike_trains_test: np.ndarray,
+    fs: Optional[int] = 2048,
+    tol_spike_ms: Optional[int] = 1,
+    tol_train_ms: Optional[int] = 40,
+) -> Tuple[np.ndarray, np.ndarray]:
+    """Compute the rate of agreement between two sets of spike trains.
+
+    Args:
+        spike_trains_ref (np.ndarray): Reference spike trains  with shape 
+            (m, n1) where m is the number of samples and n1 is the number of 
+            motor units in the reference set. 
+        spike_trains_test (np.ndarray): Test spike trains with shape (m, n2),
+            where m is the number of samples and n2 is the number of motor units
+            in the test set.
+        fs (Optional[int], optional): Sampling frequency in Hz. Defaults to 2048.
+        tol_spike_ms (Optional[int], optional): Spike tolerance in milliseconds.
+            Defaults to 1.
+        tol_train_ms (Optional[int], optional): Train shift tolerance in milliseconds.
+            Defaults to 40.
+
+    Returns:
+        Tuple[np.ndarray, np.ndarray]: A tuple containing:
+            - RoA (np.ndarray): Rate of agreement between the aligned spike trains,
+              with shape (n1, n2).
+            - pair_lag (np.ndarray): Optimal lag for alignment between the pairs of
+              motor units, with shape (n1, n2).
+
+    Note:
+        - The function does not assume that the spike trains between the sets are 
+          matched nor in the same order.
+    """
+
+    # Dimensionality checks
+    # ---------------------
+    # Check spike trains shape
+    if len( spike_trains_ref.shape ) == 1:
+        spike_trains_ref = np.expand_dims(spike_trains_ref, axis=-1)
+
+    if len( spike_trains_test.shape ) == 1:
+        spike_trains_test = np.expand_dims(spike_trains_test, axis=-1)
+    
+    if spike_trains_ref.shape[0] != spike_trains_test.shape[0]:
+        raise ValueError(f'Time dimensionality mismatch between ref {spike_trains_ref.shape} and test {spike_trains_test.shape}.')
+
+    # Initialisation
+    # --------------
+    # Put tolerances into samples
+    tol_spike = round(tol_spike_ms/1000 * fs)
+    tol_train = round(tol_train_ms/1000 * fs)
+
+    # Initialise variables
+    n_units_test = spike_trains_test.shape[1]
+    n_units_ref = spike_trains_ref.shape[-1]
+
+    # Initialise correlation variables
+    spikes_corr = np.zeros((n_units_ref, n_units_test))
+    spikes_lag = np.zeros((n_units_ref, n_units_test))
+    roa = np.empty((n_units_ref, n_units_test))
+
+    # Compute cross correlation between units to align the spike trains
+    # -----------------------------------------------------------------
+    for unit_ref, unit_test in itertools.product(range(n_units_ref), range(n_units_test)):
+        #  Get trains
+        train_0 = spike_trains_ref[:, unit_ref]
+        train_1 = spike_trains_test[:, unit_test]
+        # Apply spike tolerance
+        train_0 = np.convolve(train_0, np.ones(tol_spike), mode="same")
+        train_1 = np.convolve(train_1, np.ones(tol_spike), mode="same")
+        # Compute correlation and lags
+        curr_corr = signal.correlate(train_0, train_1, mode="full")
+        curr_lags = signal.correlation_lags(
+            len(train_0), len(train_1), mode="full"
+        )
+        # Identify optimal lag for alignment
+        trains_lag = curr_lags[np.argmax(np.abs(curr_corr))]
+        if not np.isscalar(trains_lag):
+            # If there is more than one possible lag, choose the minimum
+            trains_lag = np.amin(trains_lag)
+            # Check if the lag is within tolerance
+            if np.abs(trains_lag) > trains_lag:
+                trains_lag = np.sign(trains_lag) * tol_train
+
+        # Fill matrices
+        spikes_corr[unit_ref, unit_test] = np.amax(curr_corr)
+        spikes_lag[unit_ref, unit_test] = int(trains_lag)
+
+    # Compute RoA between aligned spike trains for all pairs
+    # ------------------------------------------------------
+    for unit_ref, unit_test in itertools.product(range(n_units_ref), range(n_units_test)):
+        # Get corresponding firings and apply optimal lag
+        firings_0 = np.nonzero(spike_trains_ref[:, unit_ref])[0]
+        firings_1 = np.nonzero(spike_trains_test[:, unit_test])[0] + spikes_lag[unit_ref, unit_test]
+
+        # Initialise variables
+        # len_firings_1 = len(firings_1)
+        firings_common = 0
+        firings_0_only = 0
+        firings_1_only = 0
+        # Pair firings
+        for firing in firings_0:
+            curr_firing_diff = np.abs(firings_1 - firing)
+            if np.any(curr_firing_diff <= tol_spike):
+                # A common firing
+                firings_common += 1
+                firings_1 = np.delete(firings_1, np.argmin(curr_firing_diff))
+            else:
+                # Only in firings 0
+                firings_0_only += 1
+        firings_1_only = len(firings_1)
+        # Compute rate of agreement
+        roa[unit_ref, unit_test] = firings_common / (firings_common + firings_0_only + firings_1_only)
+
+    return roa, spikes_lag
 
 def rate_of_agreement_all(
     spike_trains: np.ndarray,
