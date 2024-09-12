@@ -88,7 +88,7 @@ def plot_muaps(
     ax: Optional[plt.Axes] = None,
     palette_name: Optional[str] = "viridis",
     normalize: Optional[bool] = False,
-    ch_framed: Optional[str] = "max_amp",
+    ch_framed: Optional[str] = "iqr",
 ) -> plt.Axes:
     """Plot motor unit action potentials (MUAPs).
 
@@ -103,7 +103,7 @@ def plot_muaps(
         normalize (Optional[bool], optional): Flag to normalize the MUAPs.
             Defaults to False.
         ch_framed (Optional[str], optional): Channel framing method. Defaults
-            to "max_amp".
+            to "iqr".
 
     Returns:
         plt.Axes: Axes object containing the MUAP plot.
@@ -167,7 +167,7 @@ def plot_muaps(
                 continue
             frames = []
             for row in range(rows):
-                if curr_amp_ch[row, col] is False:
+                if curr_amp_ch[row, col] == 0:
                     continue
                 frames.append(
                     Rectangle(
@@ -237,7 +237,7 @@ def plot_clustered_muaps(
     palette_name: Optional[str] = "viridis",
     color_order: Optional[list] = None,
     normalize: Optional[bool] = False,
-    ch_framed: Optional[str] = "max_amp",
+    ch_framed: Optional[str] = "iqr",
 ) -> plt.Axes:
     """Plot clustered motor unit action potentials (MUAPs).
 
@@ -258,7 +258,7 @@ def plot_clustered_muaps(
         normalize (Optional[bool], optional): Flag indicating whether to
             normalize the MUAPs. Defaults to False.
         ch_framed (Optional[str], optional): Channel framing method. Defaults
-            to 'max_amp'.
+            to 'iqr'.
 
     Returns:
         plt.Axes: Axes object with the plotted MUAPs.
@@ -362,7 +362,7 @@ def plot_clustered_muaps(
                     continue
                 frames = []
                 for row in range(rows):
-                    if curr_amp_ch[row, col] is False:
+                    if curr_amp_ch[row, col] == 0:
                         continue
                     frames.append(
                         Rectangle(
