@@ -6,15 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "motor_unit_toolbox"
 version = "1.0"
 description = "motor_unit_toolbox is a package to analyse motor units"
-authors = [
-    {name = "Irene Mendez Guerra"}
-]
+authors = [{ name = "Irene Mendez Guerra" }]
 license = { file = "LICENSE" }
 readme = "README.md"
-citation = { file = "CITATION.cff" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: MIT License"
+    "License :: OSI Approved :: MIT License",
 ]
 requires-python = ">=3.8"
 dependencies = [
@@ -25,5 +22,5 @@ dependencies = [
     "matplotlib",
     "seaborn",
     "networkx",
-    "easydict"
+    "easydict",
 ]
